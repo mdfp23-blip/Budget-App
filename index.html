@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BudgetFlow - Personal Budget App</title>
+    <meta
+      name="description"
+      content="BudgetFlow helps you track spending, manage categories, monitor savings goals, and stay on top of recurring bills."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js" defer></script>
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar card">
+        <div>
+          <h1>BudgetFlow</h1>
+          <p class="muted">Simple, fast, and local-first personal finance tracking.</p>
+        </div>
+        <nav class="view-tabs" aria-label="Main navigation">
+          <button class="tab-btn active" data-view="dashboard">Dashboard</button>
+          <button class="tab-btn" data-view="transactions">Transactions</button>
+          <button class="tab-btn" data-view="planning">Planning</button>
+        </nav>
+      </header>
+
+      <main>
+        <section id="dashboard" class="view active">
+          <div class="cards-grid summary-grid">
+            <article class="metric-card card">
+              <h2>Total Income</h2>
+              <p id="metric-income" class="metric">$0.00</p>
+            </article>
+            <article class="metric-card card">
+              <h2>Total Expenses</h2>
+              <p id="metric-expenses" class="metric">$0.00</p>
+            </article>
+            <article class="metric-card card">
+              <h2>Net</h2>
+              <p id="metric-net" class="metric">$0.00</p>
+            </article>
+            <article class="metric-card card">
+              <h2>Remaining Budget</h2>
+              <p id="metric-budget-remaining" class="metric">$0.00</p>
+            </article>
+          </div>
+
+          <div class="cards-grid chart-grid">
+            <article class="card">
+              <div class="section-title-row">
+                <h2>Spending by Category</h2>
+              </div>
+              <canvas id="category-chart" aria-label="Spending by category" role="img"></canvas>
+            </article>
+            <article class="card">
+              <div class="section-title-row">
+                <h2>Monthly Trend</h2>
+              </div>
+              <canvas id="trend-chart" aria-label="Monthly trend" role="img"></canvas>
+            </article>
+          </div>
+
+          <div class="cards-grid two-col-grid">
+            <article class="card">
+              <h2>Budget Status</h2>
+              <div id="budget-status-list" class="stack-list"></div>
+            </article>
+            <article class="card">
+              <h2>Savings Goals Progress</h2>
+              <div id="goal-progress-list" class="stack-list"></div>
+            </article>
+          </div>
+        </section>
+
+        <section id="transactions" class="view">
+          <div class="cards-grid two-col-grid">
+            <article class="card">
+              <h2>Add / Edit Transaction</h2>
+              <form id="transaction-form" class="form-grid" novalidate>
+                <input type="hidden" id="transaction-id" />
+                <label>
+                  Date
+                  <input type="date" id="tx-date" required />
+                </label>
+                <label>
+                  Type
+                  <select id="tx-type" required>
+                    <option value="expense">Expense</option>
+                    <option value="income">Income</option>
+                  </select>
+                </label>
+                <label>
+                  Category
+                  <select id="tx-category" required></select>
+                </label>
+                <label>
+                  Amount
+                  <input type="number" id="tx-amount" min="0.01" step="0.01" required />
+                </label>
+                <label class="full-width">
+                  Description
+                  <input type="text" id="tx-description" maxlength="120" placeholder="Groceries, Salary, etc." />
+                </label>
+                <div class="form-actions full-width">
+                  <button type="submit" class="primary-btn" id="tx-submit-btn">Save Transaction</button>
+                  <button type="button" id="tx-cancel-edit" class="ghost-btn hidden">Cancel Edit</button>
+                </div>
+              </form>
+            </article>
+
+            <article class="card">
+              <div class="section-title-row">
+                <h2>Transaction History</h2>
+                <label class="inline-control">
+                  Month
+                  <input type="month" id="month-filter" />
+                </label>
+              </div>
+              <div id="transactions-list" class="stack-list"></div>
+            </article>
+          </div>
+        </section>
+
+        <section id="planning" class="view">
+          <div class="cards-grid two-col-grid">
+            <article class="card">
+              <h2>Budget Categories</h2>
+              <form id="category-form" class="inline-form" novalidate>
+                <input type="text" id="category-name" placeholder="Category name" required />
+                <input type="number" id="category-limit" placeholder="Monthly limit" min="0" step="0.01" required />
+                <button type="submit" class="primary-btn">Add Category</button>
+              </form>
+              <div id="categories-list" class="stack-list"></div>
+            </article>
+
+            <article class="card">
+              <h2>Savings Goals</h2>
+              <form id="goal-form" class="inline-form" novalidate>
+                <input type="text" id="goal-name" placeholder="Goal name" required />
+                <input type="number" id="goal-target" placeholder="Target amount" min="1" step="0.01" required />
+                <button type="submit" class="primary-btn">Add Goal</button>
+              </form>
+              <div id="goals-list" class="stack-list"></div>
+            </article>
+          </div>
+
+          <article class="card">
+            <h2>Recurring Bills</h2>
+            <form id="bill-form" class="inline-form" novalidate>
+              <input type="text" id="bill-name" placeholder="Bill name" required />
+              <input type="number" id="bill-amount" placeholder="Amount" min="0.01" step="0.01" required />
+              <input type="number" id="bill-day" placeholder="Day of month" min="1" max="31" required />
+              <select id="bill-category"></select>
+              <button type="submit" class="primary-btn">Add Bill</button>
+            </form>
+            <div id="bills-list" class="stack-list"></div>
+          </article>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
